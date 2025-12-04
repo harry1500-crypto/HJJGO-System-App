@@ -1,0 +1,1736 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.5">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">import React, { useState, useEffect, useMemo, useCallback } from 'react';</p>
+<p class="p1">import { initializeApp } from 'firebase/app';</p>
+<p class="p1">import {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>getAuth,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>signInAnonymously,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>onAuthStateChanged,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>signInWithCustomToken</p>
+<p class="p1">} from 'firebase/auth';</p>
+<p class="p1">import {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>getFirestore,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>collection,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>addDoc,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>onSnapshot,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>doc,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>updateDoc,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>query,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>orderBy,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>serverTimestamp,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>getDoc,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setDoc,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>arrayUnion,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>arrayRemove,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>deleteField</p>
+<p class="p1">} from 'firebase/firestore';</p>
+<p class="p1">import {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>ArrowLeft,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Users,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Calendar,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Plus,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Search,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Edit3,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>CheckCircle,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>XCircle,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Save,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>ChevronDown,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>CreditCard,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>FileText,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Clock,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Briefcase,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Trophy,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>MessageSquare,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>BookOpen,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>UserPlus,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>AlertCircle,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>History,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Link,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Trash2,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Palette</p>
+<p class="p1">} from 'lucide-react';</p>
+<p class="p2"><br></p>
+<p class="p1">// --- Firebase Configuration &amp; Initialization ---</p>
+<p class="p1">const firebaseConfig = JSON.parse(__firebase_config);</p>
+<p class="p1">const app = initializeApp(firebaseConfig);</p>
+<p class="p1">const auth = getAuth(app);</p>
+<p class="p1">const db = getFirestore(app);</p>
+<p class="p1">const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';</p>
+<p class="p2"><br></p>
+<p class="p1">// --- Constants &amp; Helpers ---</p>
+<p class="p1">const CLASS_COLORS = {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>indigo: { bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-900', icon: 'text-indigo-600', ring: 'ring-indigo-200' },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>emerald: { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-900', icon: 'text-emerald-600', ring: 'ring-emerald-200' },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>rose: { bg: 'bg-rose-50', border: 'border-rose-100', text: 'text-rose-900', icon: 'text-rose-600', ring: 'ring-rose-200' },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>amber: { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-900', icon: 'text-amber-600', ring: 'ring-amber-200' },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>sky: { bg: 'bg-sky-50', border: 'border-sky-100', text: 'text-sky-900', icon: 'text-sky-600', ring: 'ring-sky-200' },</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fuchsia: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-100', text: 'text-fuchsia-900', icon: 'text-fuchsia-600', ring: 'ring-fuchsia-200' },</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const DAY_ORDER = { "週一": 1, "週二": 2, "週三": 3, "週四": 4, "週五": 5, "週六": 6, "週日": 7 };</p>
+<p class="p2"><br></p>
+<p class="p1">const GO_LEVELS = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>...Array.from({ length: 19 }, (_, i) =&gt; `G${19 - i}`), // G19 to G1</p>
+<p class="p1"><span class="Apple-converted-space">  </span>...Array.from({ length: 7 }, (_, i) =&gt; `${i + 1}D`) <span class="Apple-converted-space">  </span>// 1D to 7D</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">// --- Components ---</p>
+<p class="p2"><br></p>
+<p class="p1">// 1. Generic UI Components</p>
+<p class="p1">const Card = ({ children, className = "", title, icon: Icon, headerColor = "text-gray-800", action }) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-4 ${className}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{(title || Icon) &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between bg-white"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{Icon &amp;&amp; &lt;Icon className={`w-5 h-5 ${headerColor}`} /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;h3 className={`font-bold text-lg ${headerColor}`}&gt;{title}&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{action &amp;&amp; &lt;div&gt;{action}&lt;/div&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="p-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{children}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p1">const Button = ({ children, onClick, variant = "primary", className = "", icon: Icon, disabled = false, title }) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const variants = {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>primary: "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-200",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>secondary: "bg-indigo-500 hover:bg-indigo-600 text-white shadow-indigo-200",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>warning: "bg-amber-400 hover:bg-amber-500 text-white shadow-amber-100",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>danger: "bg-red-500 hover:bg-red-600 text-white shadow-red-100",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>outline: "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>ghost: "bg-transparent text-gray-500 hover:bg-gray-100",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>purple: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>neutral: "bg-gray-100 hover:bg-gray-200 text-gray-600",</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>white: "bg-white hover:bg-gray-50 text-gray-600 border border-gray-300 shadow-sm transition-colors",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>presentActive: "bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-600 shadow-md ring-2 ring-emerald-100",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>absentActive: "bg-red-500 hover:bg-red-600 text-white border border-red-600 shadow-md ring-2 ring-red-100",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>onClick={onClick}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>disabled={disabled}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>title={title}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>className={`</p>
+<p class="p1"><span class="Apple-converted-space">        </span>px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-sm</p>
+<p class="p1"><span class="Apple-converted-space">        </span>${variants[variant] || variants.primary}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>${disabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>${className}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{Icon &amp;&amp; &lt;Icon className="w-4 h-4" /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{children}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const Input = ({ label, value, onChange, onBlur, type = "text", placeholder, className = "", required = false, readOnly = false }) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div className={`mb-4 ${className}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{label &amp;&amp; &lt;label className="block text-sm font-medium text-gray-500 mb-1.5 ml-1"&gt;{label}&lt;/label&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;input</p>
+<p class="p1"><span class="Apple-converted-space">      </span>type={type}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>value={value}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>onChange={onChange}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>onBlur={onBlur}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>placeholder={placeholder}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>readOnly={readOnly}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>className={`</p>
+<p class="p1"><span class="Apple-converted-space">        </span>w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800</p>
+<p class="p1"><span class="Apple-converted-space">        </span>focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500</p>
+<p class="p1"><span class="Apple-converted-space">        </span>transition-all placeholder-gray-300</p>
+<p class="p1"><span class="Apple-converted-space">        </span>${readOnly ? 'bg-gray-50 cursor-default' : ''}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p1">const Badge = ({ children, color = "gray", className = "" }) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const colors = {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>gray: "bg-gray-100 text-gray-600",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>green: "bg-emerald-100 text-emerald-700",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>blue: "bg-blue-100 text-blue-700",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>purple: "bg-indigo-100 text-indigo-700",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>yellow: "bg-amber-100 text-amber-700",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>red: "bg-red-100 text-red-700",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>amber: "bg-amber-100 text-amber-800 border border-amber-200"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[color]} ${className}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{children}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">// --- Sub-Views ---</p>
+<p class="p2"><br></p>
+<p class="p1">const HomeView = ({<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>user,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>classes,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>setView,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>setSelectedClassId,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>newClass,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>setNewClass,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>handleAddClass,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>newStudent,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>setNewStudent,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>handleAddStudent<span class="Apple-converted-space"> </span></p>
+<p class="p1">}) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const daysOfWeek = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const hours = Array.from({ length: 24 }, (_, i) =&gt; i.toString().padStart(2, '0'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const minutes = Array.from({ length: 60 }, (_, i) =&gt; i.toString().padStart(2, '0'));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Sort classes: Day of week -&gt; Time</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sortedClasses = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return [...classes].sort((a, b) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Extract day from schedule (e.g., "週二 17:00" -&gt; "週二")</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dayA = a.schedule.split(' ')[0];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const timeA = a.schedule.split(' ')[1] || '';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dayB = b.schedule.split(' ')[0];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const timeB = b.schedule.split(' ')[1] || '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dayOrderA = DAY_ORDER[dayA] || 8;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dayOrderB = DAY_ORDER[dayB] || 8;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (dayOrderA !== dayOrderB) return dayOrderA - dayOrderB;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return timeA.localeCompare(timeB);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [classes]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div className="space-y-6 animate-fade-in"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="flex items-center justify-between mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="p-2 bg-indigo-100 rounded-lg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;Briefcase className="w-6 h-6 text-indigo-600" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>即時點名系統 - 首頁</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span className="text-xs text-gray-400"&gt;使用者ID: {user?.uid?.slice(0, 8)}...&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>{/* Class List */}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;Card title="班級列表 (點擊進入點名)" icon={Users} headerColor="text-indigo-600" className="border-t-4 border-t-indigo-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{sortedClasses.map(cls =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const colorTheme = CLASS_COLORS[cls.color || 'indigo'];</p>
+<p class="p1"><span class="Apple-converted-space">          </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>key={cls.id}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>onClick={() =&gt; { setSelectedClassId(cls.id); setView('classDetail'); }}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>className={`</p>
+<p class="p1"><span class="Apple-converted-space">                </span>group relative<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>${colorTheme.bg} hover:brightness-95</p>
+<p class="p1"><span class="Apple-converted-space">                </span>border-2 ${colorTheme.border} hover:border-opacity-100</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rounded-2xl p-6</p>
+<p class="p1"><span class="Apple-converted-space">                </span>cursor-pointer transition-all duration-200<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>flex flex-col justify-center items-center<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>min-h-[160px] shadow-sm hover:shadow-md hover:-translate-y-1</p>
+<p class="p1"><span class="Apple-converted-space">              </span>`}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="flex flex-col items-center gap-2 w-full text-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 className={`font-bold text-3xl md:text-4xl ${colorTheme.text} tracking-tight break-words w-full leading-tight`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{cls.name}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p className={`${colorTheme.icon} text-lg md:text-xl font-medium flex items-center gap-1.5 bg-white/60 px-3 py-1.5 rounded-full mt-2`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;Clock className="w-5 h-5" /&gt; {cls.schedule}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p className="text-xs text-gray-400 mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{cls.studentIds?.length || 0} 位學生</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>onClick={(e) =&gt; { e.stopPropagation(); setSelectedClassId(cls.id); setView('editClass'); }}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className={`absolute top-3 right-3 p-2 bg-white rounded-full shadow-sm text-gray-400 hover:${colorTheme.text} hover:shadow-md transition-all opacity-0 group-hover:opacity-100`}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>title="編輯班級與名單"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Edit3 className="w-4 h-4" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{classes.length === 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="col-span-full py-16 text-center text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200 flex flex-col items-center justify-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Plus className="w-10 h-10 text-gray-300" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span className="text-lg"&gt;目前尚無班級，請在下方新增&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>{/* Student Management Button */}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;Card title="學生管理" icon={FileText} headerColor="text-emerald-700" className="border-t-4 border-t-emerald-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">       </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>onClick={() =&gt; setView('studentList')}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200 transition-all active:scale-[0.99] flex items-center justify-center gap-2"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Users className="w-6 h-6" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>點擊進入全體學生列表與編輯</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="grid md:grid-cols-2 gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Add Class */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;Card title="新增班級" icon={Plus} headerColor="text-emerald-700" className="border-t-4 border-t-emerald-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="班級名稱 (例如: 入門班)"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={newClass.name}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setNewClass({...newClass, name: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="grid grid-cols-2 gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;label className="block text-sm font-medium text-gray-500 mb-1.5 ml-1"&gt;每週&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;select<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                     </span>className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>value={newClass.day}</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>onChange={(e) =&gt; setNewClass({...newClass, day: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{daysOfWeek.map(day =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>&lt;option key={day} value={day}&gt;{day}&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;ChevronDown className="w-4 h-4 absolute right-3 top-3.5 text-gray-400 pointer-events-none" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">             </span></p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;label className="block text-sm font-medium text-gray-500 mb-1.5 ml-1"&gt;時間 (24時制)&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;div className="relative flex-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;select<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>className="w-full px-2 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer text-center"</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>value={newClass.hour || '17'}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>onChange={(e) =&gt; setNewClass({...newClass, hour: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>{hours.map(h =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;option key={h} value={h}&gt;{h}&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;span className="text-gray-400 font-bold"&gt;:&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;div className="relative flex-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;select<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>className="w-full px-2 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer text-center"</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>value={newClass.minute || '00'}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>onChange={(e) =&gt; setNewClass({...newClass, minute: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>{minutes.map(m =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;option key={m} value={m}&gt;{m}&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>{/* Color Picker */}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;label className="block text-sm font-medium text-gray-500 mb-2 ml-1"&gt;班級代表色&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="flex gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{Object.keys(CLASS_COLORS).map(color =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>key={color}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>onClick={() =&gt; setNewClass({...newClass, color})}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>className={`</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>w-8 h-8 rounded-full border-2 transition-all<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                         </span>${CLASS_COLORS[color].bg.replace('50', '400')}</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>${newClass.color === color ? 'border-gray-600 scale-110 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>`}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Button onClick={handleAddClass} variant="primary" className="w-full py-3" icon={CheckCircle}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>確認新增班級</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Add Student */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;Card title="新增學生" icon={Plus} headerColor="text-indigo-700" className="border-t-4 border-t-indigo-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="學生姓名 (必填)"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={newStudent.name}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setNewStudent({...newStudent, name: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="學生編號 (例如: S001) (必填)"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={newStudent.studentId}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setNewStudent({...newStudent, studentId: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>placeholder="標籤 (以逗號分隔，例如: 補課,試聽)"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>value={newStudent.tags}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>onChange={(e) =&gt; setNewStudent({...newStudent, tags: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;Button onClick={handleAddStudent} variant="secondary" className="w-full py-3" icon={CheckCircle}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>確認新增學生</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/Card&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const StudentListView = ({ students, searchTerm, setSearchTerm, setSelectedStudentId, setView }) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const filteredStudents = students.filter(s =&gt;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>s.name.includes(searchTerm) ||<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>s.studentId.includes(searchTerm) ||</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(s.tags &amp;&amp; s.tags.some(tag =&gt; tag.includes(searchTerm)))</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="space-y-6 animate-fade-in"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-0 z-10"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>icon={Search}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>placeholder="搜尋學生姓名、編號或標籤..."<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>value={searchTerm}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>onChange={(e) =&gt; setSearchTerm(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="mb-0"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="space-y-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{filteredStudents.map(student =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div key={student.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">               </span>className="p-4 flex items-center justify-between cursor-pointer"</p>
+<p class="p1"><span class="Apple-converted-space">               </span>onClick={() =&gt; { setSelectedStudentId(student.id); setView('studentDetail'); }}</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;div className="flex items-center gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{student.name[0]}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h3 className="font-bold text-gray-800 text-lg flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{student.name}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full"&gt;{student.studentId}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{student.level &amp;&amp; &lt;Badge color="yellow"&gt;{student.level}&lt;/Badge&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex flex-wrap gap-1 mt-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{student.tags?.map((tag, idx) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>&lt;Badge key={idx} color="purple"&gt;{tag}&lt;/Badge&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;div className="text-right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className="text-sm text-gray-500"&gt;剩餘&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className={`font-bold text-xl ${student.remainingLessons &lt; 3 ? 'text-red-500' : 'text-indigo-600'}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{student.remainingLessons || 0} &lt;span className="text-sm font-normal text-gray-400"&gt;堂&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">             </span></p>
+<p class="p1"><span class="Apple-converted-space">             </span>{/* Quick Actions */}</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="bg-gray-50 px-4 py-2 text-xs text-gray-400 border-t border-gray-100 flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span&gt;學校: {student.school || '未設定'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="flex items-center gap-1 text-indigo-400"&gt;點擊查看詳情 &lt;ChevronDown className="w-3 h-3" /&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{filteredStudents.length === 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="text-center py-10 text-gray-400"&gt;沒有找到符合的學生&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const StudentDetailView = ({ selectedStudent, classes, handleUpdateStudent, handleAddLessons, setView }) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!selectedStudent) return &lt;div&gt;Loading...&lt;/div&gt;;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [isEditing, setIsEditing] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [editForm, setEditForm] = useState({ ...selectedStudent });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [lessonForm, setLessonForm] = useState({</p>
+<p class="p1"><span class="Apple-converted-space">    </span>date: new Date().toISOString().split('T')[0],</p>
+<p class="p1"><span class="Apple-converted-space">    </span>plan: '',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>amount: '',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>lessonsToAdd: ''</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setEditForm({ ...selectedStudent });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [selectedStudent]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleSaveProfile = async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await handleUpdateStudent(selectedStudent.id, editForm);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setIsEditing(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Get enrolled classes for display</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const enrolledClasses = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>return classes.filter(c =&gt; c.studentIds &amp;&amp; c.studentIds.includes(selectedStudent.id));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [classes, selectedStudent.id]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Sort history: latest date first</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sortedHistory = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!selectedStudent.history) return [];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return [...selectedStudent.history].sort((a, b) =&gt; new Date(b.date) - new Date(a.date));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [selectedStudent.history]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="space-y-6 animate-fade-in"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Nav Back - Override Default */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="-mt-4 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;button onClick={() =&gt; setView('studentList')} className="flex items-center gap-1 text-gray-500 hover:text-gray-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;ArrowLeft className="w-5 h-5" /&gt; 返回列表</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Profile Header Card */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="bg-white rounded-t-xl shadow-sm border-b-4 border-emerald-500 p-6 relative overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>{/* Top Right: Remaining Lessons (Prominent) */}</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;div className="absolute top-6 right-6 text-right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p className="text-sm text-gray-500 mb-1 font-bold tracking-wide uppercase"&gt;目前剩餘堂數&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className={`text-5xl font-extrabold tracking-tight ${selectedStudent.remainingLessons &lt; 3 ? 'text-red-500' : 'text-emerald-600'}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>{selectedStudent.remainingLessons || 0}</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;span className="text-lg font-bold ml-1 text-gray-400"&gt;堂&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;div className="flex flex-col md:flex-row gap-6 items-start pr-32"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* Avatar */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="w-28 h-28 bg-indigo-100 rounded-full flex-shrink-0 flex items-center justify-center border-4 border-white shadow-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-4xl text-indigo-500 font-bold"&gt;{selectedStudent.name[0]}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex-1 w-full pt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;div className="flex justify-between items-start"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;h1 className="text-3xl font-bold text-gray-800"&gt;{selectedStudent.name}&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>{selectedStudent.level &amp;&amp; &lt;Badge color="yellow"&gt;{selectedStudent.level}&lt;/Badge&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p className="text-gray-500 font-mono mt-1 flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;span className="bg-gray-100 px-2 py-0.5 rounded text-sm"&gt;{selectedStudent.studentId}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">               </span></p>
+<p class="p1"><span class="Apple-converted-space">               </span>{/* Current Classes Display */}</p>
+<p class="p1"><span class="Apple-converted-space">               </span>{enrolledClasses.length &gt; 0 &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="mt-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;p className="text-xs text-gray-400 font-bold uppercase mb-1"&gt;目前班級&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div className="flex flex-wrap gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{enrolledClasses.map(c =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;div key={c.id} className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 border border-indigo-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;Briefcase className="w-3 h-3" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>{c.name} &lt;span className="text-indigo-400 text-xs"&gt;|&lt;/span&gt; {c.schedule}</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>)}</p>
+<p class="p2"><span class="Apple-converted-space">               </span></p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;div className="mt-4 flex gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{!isEditing &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;Button onClick={() =&gt; setIsEditing(true)} variant="outline" size="sm" icon={Edit3}&gt;編輯資料&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">         </span>{/* Inline Edit Form or Details */}</p>
+<p class="p1"><span class="Apple-converted-space">         </span>{isEditing ? (</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="姓名" value={editForm.name} onChange={e =&gt; setEditForm({...editForm, name: e.target.value})} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="生日" type="date" value={editForm.birthday} onChange={e =&gt; setEditForm({...editForm, birthday: e.target.value})} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="學校/年級" value={editForm.school} onChange={e =&gt; setEditForm({...editForm, school: e.target.value})} /&gt;</p>
+<p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* Level Dropdown */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;label className="block text-sm font-medium text-gray-500 mb-1.5 ml-1"&gt;棋力&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;select<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                       </span>className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>value={editForm.level}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>onChange={e =&gt; setEditForm({...editForm, level: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;option value=""&gt;未設定&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>{GO_LEVELS.map(lvl =&gt; &lt;option key={lvl} value={lvl}&gt;{lvl}&lt;/option&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;ChevronDown className="w-4 h-4 absolute right-3 top-3.5 text-gray-400 pointer-events-none" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* Association Rank */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="棋協棋力" value={editForm.associationRank} onChange={e =&gt; setEditForm({...editForm, associationRank: e.target.value})} /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="標籤 (逗號分隔)" value={editForm.tags?.join(',')} onChange={e =&gt; setEditForm({...editForm, tags: e.target.value.split(',')})} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="col-span-full"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;label className="block text-sm font-medium text-gray-500 mb-1"&gt;備註 / Bio&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;textarea<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                   </span>className="w-full px-4 py-2 rounded-lg border border-gray-200"</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>rows="3"</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>value={editForm.bio}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>onChange={e =&gt; setEditForm({...editForm, bio: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="col-span-full flex gap-2 justify-end"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Button onClick={() =&gt; setIsEditing(false)} variant="outline"&gt;取消&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Button onClick={handleSaveProfile} variant="primary" icon={Save}&gt;儲存變更&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-xs text-gray-400 block mb-1"&gt;棋力&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-lg font-medium text-gray-800"&gt;{selectedStudent.level || '未設定'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-xs text-gray-400 block mb-1"&gt;棋協棋力&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-lg font-medium text-gray-800"&gt;{selectedStudent.associationRank || '未設定'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-xs text-gray-400 block mb-1"&gt;生日&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-gray-800"&gt;{selectedStudent.birthday || '未設定'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-xs text-gray-400 block mb-1"&gt;學校&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-gray-800"&gt;{selectedStudent.school || '未設定'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm col-span-2 md:col-span-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;span className="text-xs text-gray-400 block mb-1"&gt;標籤&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="flex flex-wrap gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{selectedStudent.tags?.length &gt; 0 ? selectedStudent.tags.map((tag, i) =&gt; &lt;Badge key={i} color="blue"&gt;{tag}&lt;/Badge&gt;) : &lt;span className="text-gray-400 text-sm"&gt;無&lt;/span&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{selectedStudent.bio &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="col-span-full mt-1 p-3 bg-gray-50 rounded-lg text-sm text-gray-600 border border-gray-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;span className="font-bold text-gray-400 text-xs block mb-1"&gt;備註&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>{selectedStudent.bio}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Class History Timeline */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;Card title="上課歷史紀錄" icon={History} headerColor="text-gray-800" className="border-t-4 border-t-amber-400"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;div className="space-y-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{sortedHistory.length === 0 ? (</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;div className="text-center text-gray-400 py-4"&gt;尚無上課紀錄&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">               </span>sortedHistory.map((record, index) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div key={index} className="flex flex-col md:flex-row gap-2 p-2 rounded-lg border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow items-start md:items-center text-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>{/* Date &amp; Class - Left Side */}</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div className="flex items-center gap-2 w-full md:w-auto md:flex-shrink-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="font-mono font-bold text-indigo-600 w-24"&gt;{record.date}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="font-bold text-gray-800 md:w-48 truncate" title={record.classInfo || record.className}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>{record.classInfo || record.className}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                     </span>{/* Status, Time, Content - Right Side */}</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div className="flex-1 flex flex-wrap items-center gap-x-3 gap-y-1 w-full min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{/* Status Badge */}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="flex-shrink-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>{record.status === 'present' ? (</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;span className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs font-bold border border-emerald-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;CheckCircle className="w-3 h-3" /&gt; 出席</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>{record.time &amp;&amp; &lt;span className="font-normal text-emerald-600 ml-1"&gt;({record.time})&lt;/span&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>) : record.status === 'absent' ? (</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;span className="flex items-center gap-1 bg-red-50 text-red-700 px-2 py-0.5 rounded text-xs font-bold border border-red-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;XCircle className="w-3 h-3" /&gt; 缺席</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>) : null}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{/* Content / Reason */}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="flex-1 truncate text-gray-600 text-xs md:text-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>{record.status === 'present' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;span className="flex items-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;span className="font-bold text-gray-400"&gt;內容:&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;span className="truncate"&gt;{record.lessonContent || '-'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>{record.status === 'absent' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;span className="flex items-center gap-1 text-red-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;span className="font-bold"&gt;原因:&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;span className="truncate"&gt;{record.reason || '-'}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{/* Makeup Info Link if exists (Absent record that was made up) */}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{record.makeupInfo &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;div className="mt-1 w-full md:w-auto text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;div className="flex items-center gap-1 font-bold"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;Link className="w-3 h-3" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;span&gt;已補課：{record.makeupInfo.date}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;div className="pl-4 mt-0.5 flex flex-col gap-0.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;div&gt;{record.makeupInfo.classInfo}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;div className="text-amber-600"&gt;內容：{record.makeupInfo.content || '未填寫'}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>))</p>
+<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Add Lessons Section */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;Card title="增加剩餘堂數 (繳費記錄)" icon={CreditCard} headerColor="text-emerald-700" className="border-t-4 border-t-emerald-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Input label="日期" type="date" value={lessonForm.date} onChange={e =&gt; setLessonForm({...lessonForm, date: e.target.value})} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Input label="方案/課程名稱" placeholder="例如: 小棋手方案" value={lessonForm.plan} onChange={e =&gt; setLessonForm({...lessonForm, plan: e.target.value})} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Input label="金額" type="number" placeholder="$" value={lessonForm.amount} onChange={e =&gt; setLessonForm({...lessonForm, amount: e.target.value})} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;div className="mt-4 flex gap-4 items-end"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;Input label="增加堂數" type="number" placeholder="例如: 10" value={lessonForm.lessonsToAdd} onChange={e =&gt; setLessonForm({...lessonForm, lessonsToAdd: e.target.value})} className="mb-0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;Button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>onClick={() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>handleAddLessons(selectedStudent.id, lessonForm);</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>setLessonForm({ ...lessonForm, plan: '', amount: '', lessonsToAdd: '' });</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>variant="primary"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>className="mb-[1px]" // align with input</p>
+<p class="p1"><span class="Apple-converted-space">              </span>icon={Plus}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>確認增加堂數</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* Payment History */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;Card title={`繳費歷史資訊 (${selectedStudent.paymentHistory?.length || 0} 筆紀錄)`} icon={FileText} headerColor="text-indigo-700" className="border-t-4 border-t-indigo-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;div className="space-y-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{selectedStudent.paymentHistory?.length &gt; 0 ? (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>selectedStudent.paymentHistory.map((history) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div key={history.id} className="flex justify-between items-center p-4 bg-indigo-50/50 rounded-lg border border-indigo-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;h4 className="font-bold text-indigo-900"&gt;{history.plan || '一般儲值'}&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;p className="text-sm text-indigo-400 mt-1"&gt;日期: {history.date} / 金額: ${history.amount}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;div className="text-emerald-600 font-bold text-lg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>+{history.lessonsAdded} 堂</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>))</p>
+<p class="p1"><span class="Apple-converted-space">            </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="text-center text-gray-400 py-4"&gt;尚無繳費紀錄&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">         </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/Card&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const EditClassView = ({ selectedClass, students, setView }) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!selectedClass) return &lt;div&gt;Class not found&lt;/div&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [editName, setEditName] = useState(selectedClass.name);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [editSchedule, setEditSchedule] = useState(selectedClass.schedule);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [editColor, setEditColor] = useState(selectedClass.color || 'indigo');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [enrolledIds, setEnrolledIds] = useState(selectedClass.studentIds || []);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [studentSearch, setStudentSearch] = useState('');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const toggleStudent = (studentId) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setEnrolledIds(prev =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (prev.includes(studentId)) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return prev.filter(id =&gt; id !== studentId);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return [...prev, studentId];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleUpdateClass = async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'classes', selectedClass.id), {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>name: editName,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>schedule: editSchedule,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: editColor,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>studentIds: enrolledIds</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setView('home');<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const filteredStudents = students.filter(s =&gt;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>s.name.includes(studentSearch) ||<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>s.studentId.includes(studentSearch) ||<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>(s.tags &amp;&amp; s.tags.some(t =&gt; t.includes(studentSearch)))</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="max-w-4xl mx-auto animate-fade-in space-y-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="flex items-center gap-2 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onClick={() =&gt; setView('home')} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;ArrowLeft className="w-6 h-6" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h2 className="text-2xl font-bold text-gray-800"&gt;編輯班級與名單&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Card title={`班級資訊 : ${selectedClass.name}`} icon={Edit3} headerColor="text-gray-800" className="border-t-4 border-t-amber-400 h-fit"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="班級名稱" value={editName} onChange={(e) =&gt; setEditName(e.target.value)} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Input label="排程 (例如: 週二 17:00)" value={editSchedule} onChange={(e) =&gt; setEditSchedule(e.target.value)} /&gt;</p>
+<p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* Color Picker in Edit */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;label className="block text-sm font-medium text-gray-500 mb-2 ml-1"&gt;班級代表色&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="flex gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{Object.keys(CLASS_COLORS).map(color =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>key={color}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>onClick={() =&gt; setEditColor(color)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>className={`</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>w-8 h-8 rounded-full border-2 transition-all<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                             </span>${CLASS_COLORS[color].bg.replace('50', '400')}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>${editColor === color ? 'border-gray-600 scale-110 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>`}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="pt-4 flex flex-col gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;Button onClick={handleUpdateClass} variant="warning" className="w-full py-3 text-lg font-bold" icon={Save}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>儲存所有變更 (含名單)</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;Button variant="outline" className="w-full py-3 bg-gray-200 border-gray-300 hover:bg-gray-300 text-gray-700" onClick={() =&gt; setView('home')}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>取消並返回</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Card<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>title={`班級成員管理 (${enrolledIds.length} 位)`}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>icon={Users}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>headerColor="text-indigo-700"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="border-t-4 border-t-indigo-500 flex flex-col h-[600px]"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="flex flex-col h-full"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;Input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                   </span>icon={Search}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>placeholder="搜尋所有學生姓名、編號或標籤..."<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                   </span>value={studentSearch}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                   </span>onChange={(e) =&gt; setStudentSearch(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>className="mb-0"</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="flex-1 overflow-y-auto pr-2 space-y-2 border-t border-gray-100 pt-4 custom-scrollbar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{filteredStudents.length === 0 ? (</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="text-center text-gray-400 py-4"&gt;無符合搜尋條件的學生&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>filteredStudents.map(student =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>const isEnrolled = enrolledIds.includes(student.id);</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>key={student.id}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>onClick={() =&gt; toggleStudent(student.id)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>className={`</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all select-none</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>${isEnrolled<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                              </span>? 'bg-indigo-50 border-indigo-200 shadow-sm'<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                              </span>: 'bg-white border-gray-100 hover:bg-gray-50'</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>`}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;div className="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;div className={`</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>${isEnrolled ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-500'}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{student.name[0]}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;p className={`font-bold ${isEnrolled ? 'text-indigo-900' : 'text-gray-700'}`}&gt;{student.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>&lt;p className="text-xs text-gray-400"&gt;{student.studentId}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                           </span></p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>{isEnrolled ? (</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;CheckCircle className="w-6 h-6 text-indigo-500 fill-indigo-100" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;div className="w-6 h-6 rounded-full border-2 border-gray-200" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="text-center text-xs text-gray-400 mt-4 border-t pt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>點擊列表項目以 勾選/取消勾選，記得按左側「儲存所有變更」</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/Card&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const ClassDetailView = ({ selectedClass, students, handleAttendance, handleUpdateLessonContent, handleAddTemporaryStudent, handleRemoveStudentFromAttendance }) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!selectedClass) return &lt;div&gt;Loading...&lt;/div&gt;;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [classAttendance, setClassAttendance] = useState({ records: {}, details: {}, lessonContent: '', temporaryStudents: [] });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [lessonContentInput, setLessonContentInput] = useState('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [isAddingStudent, setIsAddingStudent] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [studentSearch, setStudentSearch] = useState('');</p>
+<p class="p2"><span class="Apple-converted-space">  </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [reasonInputs, setReasonInputs] = useState({});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [makeupSelections, setMakeupSelections] = useState({});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 1. Enrolled Students (Current members)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const enrolledStudents = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!selectedClass.studentIds || selectedClass.studentIds.length === 0) return [];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return students.filter(s =&gt; selectedClass.studentIds.includes(s.id));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [students, selectedClass]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 2. Temporary Students</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tempStudents = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>if (!classAttendance.temporaryStudents || classAttendance.temporaryStudents.length === 0) return [];</p>
+<p class="p1"><span class="Apple-converted-space">     </span>return students.filter(s =&gt; classAttendance.temporaryStudents.includes(s.id));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [students, classAttendance.temporaryStudents]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 3. Merged Display List</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const displayStudents = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const map = new Map();</p>
+<p class="p1"><span class="Apple-converted-space">     </span>// Add Enrolled</p>
+<p class="p1"><span class="Apple-converted-space">     </span>enrolledStudents.forEach(s =&gt; map.set(s.id, s));</p>
+<p class="p1"><span class="Apple-converted-space">     </span>// Add Temporary</p>
+<p class="p1"><span class="Apple-converted-space">     </span>tempStudents.forEach(s =&gt; map.set(s.id, s));</p>
+<p class="p1"><span class="Apple-converted-space">     </span>// Add anyone who has a record but is neither enrolled nor temporary (e.g. past members)</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const recordIds = Object.keys(classAttendance.records || {});</p>
+<p class="p1"><span class="Apple-converted-space">     </span>recordIds.forEach(id =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!map.has(id)) {</p>
+<p class="p1"><span class="Apple-converted-space">           </span>const s = students.find(st =&gt; st.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">           </span>if (s) map.set(id, s);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">     </span>});</p>
+<p class="p2"><span class="Apple-converted-space">     </span></p>
+<p class="p1"><span class="Apple-converted-space">     </span>return Array.from(map.values());</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [enrolledStudents, tempStudents, classAttendance.records, students]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Fetch attendance</p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const attendanceId = `${currentDate}_${selectedClass.id}`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const unsub = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', attendanceId), (docSnap) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (docSnap.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const data = docSnap.data();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setClassAttendance({<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">           </span>records: data.records || {},<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">           </span>details: data.details || {},</p>
+<p class="p1"><span class="Apple-converted-space">           </span>lessonContent: data.lessonContent || '',</p>
+<p class="p1"><span class="Apple-converted-space">           </span>temporaryStudents: data.temporaryStudents || []</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setLessonContentInput(data.lessonContent || '');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setClassAttendance({ records: {}, details: {}, lessonContent: '', temporaryStudents: [] });</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setLessonContentInput('');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return () =&gt; unsub();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [currentDate, selectedClass.id]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dayHint = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const d = new Date(currentDate);</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const days = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];</p>
+<p class="p1"><span class="Apple-converted-space">     </span>return days[d.getDay()];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [currentDate]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const stats = useMemo(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const total = displayStudents.length;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">     </span>const presentCount = displayStudents.filter(s =&gt; classAttendance.records[s.id] === 'present').length;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const absentCount = displayStudents.filter(s =&gt; classAttendance.records[s.id] === 'absent').length;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const unmarkedCount = total - presentCount - absentCount;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>return { total, present: presentCount, absent: absentCount, unmarked: unmarkedCount };</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [displayStudents, classAttendance]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const searchResults = students.filter(s =&gt;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>!displayStudents.find(d =&gt; d.id === s.id) &amp;&amp;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>(s.name.includes(studentSearch) || s.studentId.includes(studentSearch))</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">     </span>&lt;div className="space-y-6 animate-fade-in"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{/* Header Card */}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;Card className="border-t-4 border-t-indigo-500 bg-white"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="flex flex-col gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h2 className="text-2xl font-bold text-gray-800"&gt;{selectedClass.name} - {selectedClass.schedule}&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-3 mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div className="flex items-center gap-2 text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full w-fit border border-indigo-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;Calendar className="w-4 h-4" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span className="font-mono font-bold"&gt;日期: &lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>type="date"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>value={currentDate}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>onChange={(e) =&gt; setCurrentDate(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>className="bg-transparent border-none p-0 focus:ring-0 text-indigo-700 font-bold cursor-pointer w-32"</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span className="text-xs text-gray-400"&gt;({dayHint})&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div className="text-xs text-amber-500 flex items-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>&lt;AlertCircle className="w-3 h-3" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>&lt;span&gt;若選取非上課日，請確認是補課場次&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Button variant="warning" icon={Clock} disabled&gt;查看歷史記錄 (待實作)&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">             </span>{/* Lesson Content Input */}</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;label className="text-sm font-bold text-gray-500 mb-1 block flex items-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;BookOpen className="w-4 h-4" /&gt; 本日上課內容</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                      </span>type="text"</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none transition-all"</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>placeholder="例如：接近戰＋複習..."</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>value={lessonContentInput}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>onChange={(e) =&gt; setLessonContentInput(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;Button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                      </span>onClick={() =&gt; handleUpdateLessonContent(selectedClass.id, currentDate, lessonContentInput)}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>variant="purple"</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>icon={Save}</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>儲存內容</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">           </span></p>
+<p class="p1"><span class="Apple-converted-space">           </span>{/* Stats Row */}</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="grid grid-cols-4 gap-4 mt-6 divide-x divide-gray-100 text-center pt-6 border-t border-gray-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-gray-400 text-sm mb-1"&gt;總人數&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-3xl font-bold text-gray-800"&gt;{stats.total}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-emerald-500 text-sm mb-1"&gt;已到&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-3xl font-bold text-emerald-600"&gt;{stats.present}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-red-500 text-sm mb-1"&gt;缺席&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-3xl font-bold text-red-600"&gt;{stats.absent}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-gray-400 text-sm mb-1"&gt;未點名&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="text-3xl font-bold text-gray-600"&gt;{stats.unmarked}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/Card&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>{/* Student List for Attendance */}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>{/* Add Temporary Student Header */}</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="text-sm font-bold text-gray-500"&gt;學生名單&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>onClick={() =&gt; setIsAddingStudent(!isAddingStudent)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="text-xs flex items-center gap-1 text-indigo-600 font-bold hover:bg-indigo-50 px-2 py-1 rounded"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;UserPlus className="w-3 h-3" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{isAddingStudent ? '關閉搜尋' : '新增補課/臨時學生'}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">           </span>{/* Add Student Search Panel */}</p>
+<p class="p1"><span class="Apple-converted-space">           </span>{isAddingStudent &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-indigo-50 p-4 border-b border-indigo-100 animate-fade-in"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="flex gap-2 mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;Search className="w-5 h-5 text-indigo-400" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                       </span>className="bg-transparent border-none focus:ring-0 w-full text-indigo-900 placeholder-indigo-300"</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>placeholder="搜尋學生姓名加入此堂課..."</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>value={studentSearch}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>onChange={(e) =&gt; setStudentSearch(e.target.value)}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>autoFocus</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div className="max-h-40 overflow-y-auto space-y-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{studentSearch &amp;&amp; searchResults.map(s =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;div key={s.id} className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;span&gt;{s.name} &lt;span className="text-gray-400 text-xs"&gt;({s.studentId})&lt;/span&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                             </span>onClick={() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>handleAddTemporaryStudent(selectedClass.id, currentDate, s.id);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>setStudentSearch('');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>setIsAddingStudent(false);</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>className="text-xs bg-indigo-600 text-white px-2 py-1 rounded"</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>加入</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{studentSearch &amp;&amp; searchResults.length === 0 &amp;&amp; &lt;div className="text-gray-400 text-sm"&gt;無符合結果&lt;/div&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">           </span>{displayStudents.length === 0 ? (</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="p-10 text-center text-gray-400 flex flex-col items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;Users className="w-10 h-10 text-gray-300" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;p&gt;本班級目前沒有成員&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">               </span>&lt;p className="text-sm"&gt;請至「編輯班級」加入學生，或使用上方「新增補課學生」&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>) : (</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="grid grid-cols-12 bg-gray-50 p-4 text-sm font-medium text-gray-500 border-b border-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="col-span-2"&gt;編號&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="col-span-4"&gt;姓名 / 剩餘&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="col-span-3"&gt;標籤 / 時間 / 原因&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="col-span-3 text-right pr-4"&gt;點名操作&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">             </span></p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div className="divide-y divide-gray-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{displayStudents.map(student =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>const status = classAttendance.records?.[student.id] || 'unmarked';</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>const details = classAttendance.details?.[student.id] || {};</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>const isTemp = classAttendance.temporaryStudents?.includes(student.id);</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>const reasonValue = reasonInputs[student.id] !== undefined ? reasonInputs[student.id] : (details.reason || '');</p>
+<p class="p2"><span class="Apple-converted-space">                  </span></p>
+<p class="p1"><span class="Apple-converted-space">                  </span>// Filter absences: absent status AND NOT YET MADE UP (no makeupInfo)</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>const absences = isTemp ? (student.history || []).filter(h =&gt; h.status === 'absent' &amp;&amp; !h.makeupInfo) : [];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>key={student.id}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>className={`grid grid-cols-12 p-4 items-center transition-colors group ${isTemp ? 'bg-amber-50 hover:bg-amber-100/70 border-l-4 border-amber-300' : 'hover:bg-gray-50'}`}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>{/* 1. 編號 */}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;div className="col-span-2 relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;div className="font-mono font-bold text-gray-700"&gt;{student.studentId}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                       </span></p>
+<p class="p1"><span class="Apple-converted-space">                       </span>{/* 2. 姓名、棋力、剩餘堂數 */}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;div className="col-span-4 flex flex-col justify-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;div className="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;span className="font-bold text-lg text-gray-800"&gt;{student.name}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>{isTemp &amp;&amp; &lt;Badge color="amber"&gt;補課&lt;/Badge&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>{student.level &amp;&amp; &lt;Badge color="yellow" className="text-[10px]"&gt;{student.level}&lt;/Badge&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                          </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{/* If Makeup Student and Signed In, show makeup target info clearly */}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{isTemp &amp;&amp; status === 'present' &amp;&amp; details.makeupTarget &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;div className="text-xs text-amber-700 font-bold bg-amber-100/50 px-1.5 py-0.5 rounded w-fit"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>補課：{details.makeupTarget}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;div className={`text-sm font-bold ${student.remainingLessons &lt; 3 ? 'text-red-500' : 'text-emerald-600'}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>剩餘: {student.remainingLessons} 堂</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                       </span>{/* 3. 中間欄位: 標籤、時間、缺席原因 */}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;div className="col-span-3 flex flex-col justify-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{/* Makeup Date Selector - Only show if temp student and unmarked */}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{isTemp &amp;&amp; status === 'unmarked' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;div className="mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;label className="text-[10px] text-amber-600 font-bold block mb-0.5"&gt;選擇補缺席日期:&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;select<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>className="text-xs p-1 border border-amber-300 rounded bg-white w-full max-w-[180px]"</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>value={makeupSelections[student.id] || ''}</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>onChange={(e) =&gt; setMakeupSelections({...makeupSelections, [student.id]: e.target.value})}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>&lt;option value=""&gt;-- 請選擇 (尚未補課日期) --&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>{absences.map((abs, idx) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                                      </span>&lt;option key={idx} value={abs.date}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                         </span>{abs.date} ({abs.classInfo})</p>
+<p class="p1"><span class="Apple-converted-space">                                      </span>&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;div className="flex flex-wrap gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>{student.tags?.slice(0, 3).map((t, i) =&gt; &lt;Badge key={i} color="purple"&gt;{t}&lt;/Badge&gt;)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{status === 'present' &amp;&amp; details.time &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;div className="text-xs text-gray-500 flex items-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;Clock className="w-3 h-3" /&gt; {details.time}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{status === 'absent' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;div className="mt-1 animate-fade-in"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>type="text"</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>className="w-full text-xs border-b border-red-200 bg-transparent focus:border-red-500 outline-none text-red-600 placeholder-red-200"</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>placeholder="輸入缺席原因/補課日期..."</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>value={reasonValue}</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>onChange={(e) =&gt; setReasonInputs({ ...reasonInputs, [student.id]: e.target.value })}</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>onBlur={(e) =&gt; handleAttendance(selectedClass.id, currentDate, student.id, 'absent', e.target.value, classAttendance.lessonContent)}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>autoFocus</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                       </span></p>
+<p class="p1"><span class="Apple-converted-space">                       </span>{/* 4. 操作按鈕 + 移除功能 */}</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;div className="col-span-3 flex items-center justify-end gap-2 pl-1 relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;Button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>variant={status === 'present' ? 'presentActive' : 'white'}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>className={`w-20 h-10 text-sm shadow-sm ${status === 'present' ? '' : 'hover:border-emerald-300'}`}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>onClick={() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                               </span>let makeupTargetDate = null;</p>
+<p class="p1"><span class="Apple-converted-space">                               </span>if (isTemp &amp;&amp; status !== 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">                                  </span>makeupTargetDate = makeupSelections[student.id];</p>
+<p class="p1"><span class="Apple-converted-space">                               </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                               </span>handleAttendance(selectedClass.id, currentDate, student.id, 'present', '', classAttendance.lessonContent, makeupTargetDate);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>title="簽到"</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;span&gt;簽到&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>{status === 'present' &amp;&amp; &lt;CheckCircle className="w-3 h-3" /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/Button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;Button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>variant={status === 'absent' ? 'absentActive' : 'white'}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>className={`w-20 h-10 text-sm shadow-sm ${status === 'absent' ? '' : 'hover:border-red-300'}`}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>onClick={() =&gt; handleAttendance(selectedClass.id, currentDate, student.id, 'absent', reasonValue, classAttendance.lessonContent)}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>title="缺席"</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;span&gt;缺席&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>{status === 'absent' &amp;&amp; &lt;XCircle className="w-3 h-3" /&gt;}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/Button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{/* Remove Student Button */}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                             </span>onClick={() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (isTemp) {</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>// Directly remove temp student</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>handleRemoveStudentFromAttendance(selectedClass.id, currentDate, student.id, true);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>// Reset enrolled student status to unmarked</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>if(confirm('確定要清除此學生的點名狀態嗎？\n(這將會一併刪除對應的歷史紀錄)')) {</p>
+<p class="p1"><span class="Apple-converted-space">                                      </span>handleRemoveStudentFromAttendance(selectedClass.id, currentDate, student.id, false);</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors ml-1"</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>title={isTemp ? "移除補課學生 (清除補課紀錄)" : "清除狀態 (移除當日紀錄)"}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;Trash2 className="w-4 h-4" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                       </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">// ... (EditClassView and Main App Component remain largely the same, ensuring handleAttendance includes makeupTarget logic)</p>
+<p class="p2"><br></p>
+<p class="p1">// --- Main Application Component ---</p>
+<p class="p1">export default function App() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [user, setUser] = useState(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [view, setView] = useState('home');<span class="Apple-converted-space"> </span></p>
+<p class="p2"><span class="Apple-converted-space">  </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [students, setStudents] = useState([]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [classes, setClasses] = useState([]);</p>
+<p class="p2"><span class="Apple-converted-space">  </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [selectedStudentId, setSelectedStudentId] = useState(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [selectedClassId, setSelectedClassId] = useState(null);</p>
+<p class="p2"><span class="Apple-converted-space">  </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [newClass, setNewClass] = useState({ name: '', day: '週一', hour: '17', minute: '00', color: 'indigo' });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [newStudent, setNewStudent] = useState({ name: '', studentId: '', tags: '' });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [searchTerm, setSearchTerm] = useState('');</p>
+<p class="p2"><span class="Apple-converted-space">  </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const selectedStudent = useMemo(() =&gt; students.find(s =&gt; s.id === selectedStudentId), [students, selectedStudentId]);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const selectedClass = useMemo(() =&gt; classes.find(c =&gt; c.id === selectedClassId), [classes, selectedClassId]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ... (Auth &amp; Data Fetching useEffects - unchanged)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const initAuth = async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (typeof __initial_auth_token !== 'undefined' &amp;&amp; __initial_auth_token) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await signInWithCustomToken(auth, __initial_auth_token);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await signInAnonymously(auth);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">    </span>initAuth();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const unsubscribe = onAuthStateChanged(auth, setUser);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return () =&gt; unsubscribe();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, []);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!user) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const studentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const unsubStudents = onSnapshot(studentsRef, (snapshot) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setStudents(snapshot.docs.map(doc =&gt; ({ id: doc.id, ...doc.data() })));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}, (error) =&gt; console.error("Error fetching students:", error));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const classesRef = collection(db, 'artifacts', appId, 'public', 'data', 'classes');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const unsubClasses = onSnapshot(query(classesRef, orderBy('createdAt', 'desc')), (snapshot) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setClasses(snapshot.docs.map(doc =&gt; ({ id: doc.id, ...doc.data() })));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}, (error) =&gt; console.error("Error fetching classes:", error));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>return () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>unsubStudents();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>unsubClasses();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [user]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ... (Add Class/Student handlers - unchanged except color in class)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleAddClass = async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!user || !newClass.name || !newClass.day || !newClass.hour || !newClass.minute) return;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const fullSchedule = `${newClass.day} ${newClass.hour}:${newClass.minute}`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'classes'), {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>name: newClass.name,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>schedule: fullSchedule,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>color: newClass.color || 'indigo',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>studentIds: [],<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>createdAt: serverTimestamp()</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setNewClass({ name: '', day: '週一', hour: '17', minute: '00', color: 'indigo' });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.error("Error adding class:", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleAddStudent = async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!user || !newStudent.name || !newStudent.studentId) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tagsArray = newStudent.tags.split(/[,，]/).map(t =&gt; t.trim()).filter(t =&gt; t);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'students'), {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>name: newStudent.name,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>studentId: newStudent.studentId,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>tags: tagsArray,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>remainingLessons: 0,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>history: [],<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>bio: '',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>notes: '',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>birthday: '',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>school: '',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>level: '未設定',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>associationRank: '',</p>
+<p class="p1"><span class="Apple-converted-space">        </span>paymentHistory: [],</p>
+<p class="p1"><span class="Apple-converted-space">        </span>createdAt: serverTimestamp()</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setNewStudent({ name: '', studentId: '', tags: '' });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>alert('學生新增成功！');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.error("Error adding student:", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleUpdateStudent = async (id, data) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!user) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', id), data);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.error("Error updating student:", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><span class="Apple-converted-space">  </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleAddLessons = async (studentId, lessonData) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ... (unchanged)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!user) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const targetStudent = students.find(s =&gt; s.id === studentId);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!targetStudent) return;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const lessonsToAdd = parseInt(lessonData.lessonsToAdd, 10);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (isNaN(lessonsToAdd) || lessonsToAdd === 0) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const newHistoryItem = {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>id: Date.now().toString(),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>date: lessonData.date,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>plan: lessonData.plan,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>amount: lessonData.amount,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>lessonsAdded: lessonsToAdd,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>timestamp: Date.now()</p>
+<p class="p1"><span class="Apple-converted-space">      </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const updatedHistory = [newHistoryItem, ...(targetStudent.paymentHistory || [])];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const newRemaining = (targetStudent.remainingLessons || 0) + lessonsToAdd;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId), {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>remainingLessons: newRemaining,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>paymentHistory: updatedHistory</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.error("Error adding lessons:", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// UPDATED handleAttendance to save makeupTarget in details</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleAttendance = async (classId, dateStr, studentId, clickedStatus, reason = '', currentLessonContent = '', makeupTargetDate = null) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!user) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const attendanceId = `${dateStr}_${classId}`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const attendanceRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', attendanceId);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const studentRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const attendanceSnap = await getDoc(attendanceRef);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const currentData = attendanceSnap.exists() ? attendanceSnap.data() : { records: {}, details: {} };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const currentRecords = currentData.records || {};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const currentDetails = currentData.details || {};</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const oldStatus = currentRecords[studentId] || 'unmarked';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let newStatus = clickedStatus;</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (oldStatus === clickedStatus &amp;&amp; clickedStatus !== 'absent') {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">         </span>newStatus = 'unmarked';<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let lessonChange = 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (oldStatus !== 'present' &amp;&amp; newStatus === 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">         </span>lessonChange = -1;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>else if (oldStatus === 'present' &amp;&amp; newStatus !== 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">         </span>lessonChange = 1;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let timestamp = currentDetails[studentId]?.time || '';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (newStatus === 'present' &amp;&amp; oldStatus !== 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">         </span>const now = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>timestamp = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute:'2-digit' });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else if (newStatus !== 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">         </span>timestamp = '';<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Determine makeup target info string if makeupTargetDate is provided</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let makeupTargetStr = "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (makeupTargetDate) {</p>
+<p class="p1"><span class="Apple-converted-space">         </span>// We need to fetch student's history to find the class info for that date</p>
+<p class="p1"><span class="Apple-converted-space">         </span>const studentDoc = await getDoc(studentRef);</p>
+<p class="p1"><span class="Apple-converted-space">         </span>if (studentDoc.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const hist = studentDoc.data().history || [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const targetRecord = hist.find(h =&gt; h.date === makeupTargetDate &amp;&amp; h.status === 'absent');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (targetRecord) {</p>
+<p class="p1"><span class="Apple-converted-space">               </span>makeupTargetStr = `${targetRecord.date} ${targetRecord.classInfo}`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>makeupTargetStr = makeupTargetDate; // Fallback</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">         </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else if (currentDetails[studentId]?.makeupTarget &amp;&amp; newStatus === 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>// Keep existing info if re-confirming present</p>
+<p class="p1"><span class="Apple-converted-space">          </span>makeupTargetStr = currentDetails[studentId].makeupTarget;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Update Attendance Doc</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const newRecords = { ...currentRecords, [studentId]: newStatus };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const newDetails = {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">         </span>...currentDetails,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">         </span>[studentId]: {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>...currentDetails[studentId],<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>time: timestamp,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>reason: newStatus === 'absent' ? reason : '',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>makeupTarget: newStatus === 'present' ? makeupTargetStr : '' // Save makeup info</p>
+<p class="p1"><span class="Apple-converted-space">         </span>}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>await setDoc(attendanceRef, {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>classId,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>date: dateStr,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>records: newRecords,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>details: newDetails,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>lessonContent: currentLessonContent,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>updatedAt: serverTimestamp()</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}, { merge: true });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (lessonChange !== 0) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const studentDoc = await getDoc(studentRef);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (studentDoc.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const currentLessons = studentDoc.data().remainingLessons || 0;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>await updateDoc(studentRef, {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>remainingLessons: currentLessons + lessonChange</p>
+<p class="p1"><span class="Apple-converted-space">          </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const studentDocSnap = await getDoc(studentRef);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (studentDocSnap.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">         </span>let history = studentDocSnap.data().history || [];</p>
+<p class="p1"><span class="Apple-converted-space">         </span>const targetClass = classes.find(c =&gt; c.id === classId);</p>
+<p class="p1"><span class="Apple-converted-space">         </span>const classInfo = targetClass ? `${targetClass.name} ${targetClass.schedule}` : '未知班級';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">         </span>history = history.filter(h =&gt; !(h.date === dateStr &amp;&amp; h.classId === classId));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">         </span>if (newStatus !== 'unmarked') {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (makeupTargetDate &amp;&amp; newStatus === 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">               </span>// Makeup: do not add duplicate entry for today</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.push({</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>date: dateStr,</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>classId: classId,</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>classInfo: classInfo,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                   </span>className: targetClass?.name || '未知',</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>status: newStatus,</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>time: timestamp,</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>reason: newStatus === 'absent' ? reason : '',</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>lessonContent: currentLessonContent</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">         </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">         </span>if (newStatus === 'present' &amp;&amp; makeupTargetDate) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>history = history.map(h =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">               </span>if (h.date === makeupTargetDate &amp;&amp; h.status === 'absent') {</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>return {</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>...h,</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>makeupInfo: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>date: dateStr,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>classInfo: classInfo,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>content: currentLessonContent</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>};</p>
+<p class="p1"><span class="Apple-converted-space">               </span>}</p>
+<p class="p1"><span class="Apple-converted-space">               </span>return h;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">         </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">         </span>await updateDoc(studentRef, { history });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>console.error("Error updating attendance:", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleRemoveStudentFromAttendance = async (classId, dateStr, studentId, isTemporary) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>if (!user) return;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const attendanceId = `${dateStr}_${classId}`;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const attendanceRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', attendanceId);</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const studentRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);</p>
+<p class="p2"><span class="Apple-converted-space">     </span></p>
+<p class="p1"><span class="Apple-converted-space">     </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const attendanceSnap = await getDoc(attendanceRef);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentStatus = 'unmarked';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let makeupTargetStr = '';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (attendanceSnap.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">           </span>currentStatus = attendanceSnap.data().records?.[studentId] || 'unmarked';</p>
+<p class="p1"><span class="Apple-converted-space">           </span>makeupTargetStr = attendanceSnap.data().details?.[studentId]?.makeupTarget || '';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (currentStatus === 'present') {</p>
+<p class="p1"><span class="Apple-converted-space">           </span>const studentDoc = await getDoc(studentRef);</p>
+<p class="p1"><span class="Apple-converted-space">           </span>if (studentDoc.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>const currentLessons = studentDoc.data().remainingLessons || 0;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>await updateDoc(studentRef, {</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>remainingLessons: currentLessons + 1</p>
+<p class="p1"><span class="Apple-converted-space">              </span>});</p>
+<p class="p1"><span class="Apple-converted-space">           </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const updatePayload = {};</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (isTemporary) {</p>
+<p class="p1"><span class="Apple-converted-space">           </span>updatePayload['temporaryStudents'] = arrayRemove(studentId);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>updatePayload[`records.${studentId}`] = deleteField();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>updatePayload[`details.${studentId}`] = deleteField();</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>await updateDoc(attendanceRef, updatePayload);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const sSnap = await getDoc(studentRef);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (sSnap.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">           </span>let history = sSnap.data().history || [];</p>
+<p class="p2"><span class="Apple-converted-space">           </span></p>
+<p class="p1"><span class="Apple-converted-space">           </span>const newHistory = history.filter(h =&gt; !(h.date === dateStr &amp;&amp; h.classId === classId));</p>
+<p class="p2"><span class="Apple-converted-space">           </span></p>
+<p class="p1"><span class="Apple-converted-space">           </span>const cleanedHistory = newHistory.map(h =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>if (h.makeupInfo &amp;&amp; h.makeupInfo.date === dateStr) {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>const { makeupInfo, ...rest } = h;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>return rest;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>return h;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">           </span>if (JSON.stringify(history) !== JSON.stringify(cleanedHistory)) {</p>
+<p class="p1"><span class="Apple-converted-space">              </span>await updateDoc(studentRef, { history: cleanedHistory });</p>
+<p class="p1"><span class="Apple-converted-space">           </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">     </span>} catch(e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.error("Error removing student:", e);</p>
+<p class="p1"><span class="Apple-converted-space">     </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleUpdateLessonContent = async (classId, dateStr, content) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>// ... (unchanged logic for updating lesson content)</p>
+<p class="p1"><span class="Apple-converted-space">     </span>if (!user) return;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const attendanceId = `${dateStr}_${classId}`;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const attendanceRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', attendanceId);</p>
+<p class="p2"><span class="Apple-converted-space">     </span></p>
+<p class="p1"><span class="Apple-converted-space">     </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await setDoc(attendanceRef, { lessonContent: content }, { merge: true });</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const attendanceSnap = await getDoc(attendanceRef);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!attendanceSnap.exists()) return;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const data = attendanceSnap.data();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const studentIds = Object.keys(data.records || {});</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const updates = studentIds.map(async (sid) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const sRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', sid);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const sSnap = await getDoc(sRef);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (sSnap.exists()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let history = sSnap.data().history || [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let changed = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history = history.map(h =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (h.date === dateStr &amp;&amp; h.classId === classId) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>changed = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return { ...h, lessonContent: content };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (h.makeupInfo &amp;&amp; h.makeupInfo.date === dateStr &amp;&amp; h.makeupInfo.classInfo.includes(classId)) {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                         </span>changed = true;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>return {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                             </span>...h,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                             </span>makeupInfo: { ...h.makeupInfo, content: content }<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                         </span>};</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return h;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (changed) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>await updateDoc(sRef, { history });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>await Promise.all(updates);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>alert("上課內容已儲存並同步至學生歷史紀錄");</p>
+<p class="p1"><span class="Apple-converted-space">     </span>} catch(e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.error("Error saving content", e);</p>
+<p class="p1"><span class="Apple-converted-space">     </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleAddTemporaryStudent = async (classId, dateStr, studentId) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">     </span>if (!user) return;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const attendanceId = `${dateStr}_${classId}`;</p>
+<p class="p1"><span class="Apple-converted-space">     </span>const attendanceRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', attendanceId);</p>
+<p class="p1"><span class="Apple-converted-space">     </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>await setDoc(attendanceRef, {</p>
+<p class="p1"><span class="Apple-converted-space">           </span>temporaryStudents: arrayUnion(studentId)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}, { merge: true });</p>
+<p class="p1"><span class="Apple-converted-space">     </span>} catch(e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.error("Error adding temp student", e);</p>
+<p class="p1"><span class="Apple-converted-space">     </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="min-h-screen bg-gray-100 font-sans text-gray-800 pb-20"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="flex items-center gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{view !== 'home' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                  </span>onClick={() =&gt; setView('home')}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                   </span>&lt;ArrowLeft className="w-6 h-6" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;h1 className="text-xl font-bold text-gray-800 truncate"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{view === 'home' &amp;&amp; "即時點名系統"}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{view === 'studentList' &amp;&amp; "全體學生管理"}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{view === 'classDetail' &amp;&amp; selectedClass?.name}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{view === 'studentDetail' &amp;&amp; `學生資料: ${selectedStudent?.name}`}</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>{view === 'editClass' &amp;&amp; "編輯班級與名單"}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">           </span></p>
+<p class="p1"><span class="Apple-converted-space">           </span>&lt;div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-emerald-400"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;main className="max-w-4xl mx-auto px-4 py-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{view === 'home' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;HomeView<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>user={user}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>classes={classes}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setView={setView}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setSelectedClassId={setSelectedClassId}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>newClass={newClass}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setNewClass={setNewClass}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleAddClass={handleAddClass}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>newStudent={newStudent}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setNewStudent={setNewStudent}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleAddStudent={handleAddStudent}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{view === 'studentList' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;StudentListView<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>students={students}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>searchTerm={searchTerm}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setSearchTerm={setSearchTerm}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setSelectedStudentId={setSelectedStudentId}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setView={setView}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{view === 'studentDetail' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;StudentDetailView<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>selectedStudent={selectedStudent}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>classes={classes}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleUpdateStudent={handleUpdateStudent}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleAddLessons={handleAddLessons}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setView={setView}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{view === 'classDetail' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;ClassDetailView<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>selectedClass={selectedClass}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>students={students}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleAttendance={handleAttendance}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleUpdateLessonContent={handleUpdateLessonContent}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleAddTemporaryStudent={handleAddTemporaryStudent}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>handleRemoveStudentFromAttendance={handleRemoveStudentFromAttendance}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{view === 'editClass' &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;EditClassView<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>selectedClass={selectedClass}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>students={students}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setView={setView}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/main&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+</body>
+</html>
